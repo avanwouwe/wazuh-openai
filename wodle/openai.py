@@ -22,6 +22,7 @@ RESULTS = tempfile.TemporaryFile(mode='w+')
 TEMP_LOG_FILE = None
 
 CONFIG = None
+org_id = None
 
 parser = argparse.ArgumentParser(description="Export OpenAI audit logs for a given organization.")
 parser.add_argument('--unread', '-u', dest='unread', action='store_true',
@@ -30,11 +31,14 @@ parser.add_argument('--offset', '-o', dest='offset', type=int, default=24,
                    help='maximum number of hours to go back in time')
 args = parser.parse_args()
 
+
 def main():
-    global TEMP_LOG_FILE, CONFIG
+    global TEMP_LOG_FILE, CONFIG, org_id
 
     try:
         CONFIG = load_config()
+        org_id = dict_path(CONFIG, STR_ORGID)
+
         os.makedirs(TEMP_LOG_DIR, exist_ok=True)
         cleanup_old_temp_files()
 
@@ -219,6 +223,7 @@ def write_event(ev):
             "srcip": ip,
             "srcuser": actor,
             STR_OPENAI: {
+                "org_id": org_id,
                 "project_id": proj_id,
                 "project_name": proj_name,
                 "type" : ev_type,
@@ -236,7 +241,7 @@ def write_event(ev):
             f.write("\n")
 
     except Exception as e:
-        warning(f"failed to parse event: {e}")
+        fatal_error(f"failed to parse event: {e}")
 def dict_path(d, *path):
     cur = d
     for k in path:
@@ -272,6 +277,7 @@ def json_msg(type, message):
     msg = {
         "id": random.randint(0, 99999999999999),
         STR_OPENAI: {
+            "org_id": org_id,
             "type": type,
             "message": message
         }
