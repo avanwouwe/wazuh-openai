@@ -1,0 +1,114 @@
+<var name="openai_description">OpenAI $(openai.type)</var>
+
+<group name="openai">
+  <!-- Base rule for all OpenAI audit events -->
+  <rule id="66050" level="3">
+    <decoded_as>json</decoded_as>
+    <field name="openai.type">\.+</field>
+    <description>$openai_description</description>
+  </rule>
+
+  <!-- Extraction errors and warnings -->
+  <rule id="66051" level="12">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^extraction warning</field>
+    <description>$openai_description</description>
+  </rule>
+  <rule id="66052" level="14">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^extraction error</field>
+    <description>$openai_description</description>
+  </rule>
+
+
+  <!-- Authentication events - Low severity -->
+  <rule id="66053" level="5">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^login.</field>
+    <description>OpenAI : $(openai.type) by user $(srcuser)</description>
+  </rule>
+
+  <!-- Invitations - Normal operations -->
+  <rule id="66054" level="6">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^invite.</field>
+    <description>$openai_description</description>
+  </rule>
+
+  <!-- Failed login attempts -->
+  <rule id="66055" level="7">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^login.failed$</field>
+    <description>$openai_description</description>
+  </rule>
+
+  <!-- User management -->
+  <rule id="66056" level="7">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^user.</field>
+    <description>$openai_description</description>
+  </rule>
+
+  <!-- Group, project and role assignment changes -->
+  <rule id="66057" level="9">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^project.|^role.|^group.</field>
+    <description>OpenAI : sensitive "$(openai.type)" activity by user $(srcuser)</description>
+  </rule>
+
+  <!-- Checkpoint permission changes -->
+  <rule id="66058" level="9">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^checkpoint.</field>
+    <description>OpenAI : sensitive "$(openai.type)" activity by user $(srcuser)</description>
+  </rule>
+
+  <!-- Organisation-level operations -->
+  <rule id="66059" level="10">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^organization.|^rate_limit.|^scim.</field>
+    <description>OpenAI : sensitive "$(openai.type)" activity by user $(srcuser)</description>
+  </rule>
+
+  <!-- Service account changes -->
+  <rule id="66060" level="10">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^service_account.</field>
+    <description>OpenAI : sensitive "$(openai.type)" on service account $(openai.object_id) by user $(srcuser)</description>
+  </rule>
+
+  <!-- Project lifecycle management -->
+  <rule id="66061" level="10">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^project.</field>
+    <description>OpenAI : sensitive "$(openai.type)" on project '$(openai.project_name)' by user $(srcuser)</description>
+  </rule>
+
+  <!-- External key, API key or certificate management - High security impact -->
+  <rule id="66062" level="10">
+    <if_sid>66050</if_sid>
+    <field name="openai.type">^api_key.|^external_key.|^certificate.</field>
+    <description>OpenAI : sensitive "$(openai.type)" activity by user $(srcuser)</description>
+  </rule>
+
+  <!-- Role changes - Privilege escalation risk -->
+  <rule id="66063" level="10">
+    <if_sid>66056</if_sid>
+    <field name="openai.message">"role"\s*:\s*"owner"$</field>
+    <description>OpenAI : user $(srcuser) added owner to project '$(openai.project_name)'</description>
+  </rule>
+
+  <!-- Correlation rule: Intensive activity by same user - Requires investigation -->
+  <rule id="66064" level="10" frequency="5" timeframe="60" ignore="600">
+    <if_matched_sid>66050</if_matched_sid>
+    <same_srcuser/>
+    <description>OpenAI : intensive activity by user $(srcuser)</description>
+  </rule>
+
+  <!-- Correlation rule: Failed logins - Possible credential stuffing attack -->
+  <rule id="66065" level="12" frequency="5" timeframe="300" ignore="600">
+    <if_matched_sid>66055</if_matched_sid>
+    <same_srcuser/>
+    <description>OpenAI : many failed logins by $(srcuser), possible credential stuffing attack</description>
+  </rule>
+</group>

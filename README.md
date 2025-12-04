@@ -1,5 +1,5 @@
 # wazuh-openai
-Wazuh wodle that integrates all OpenAI audit events (including logins, modification of API keys or limits).
+Wazuh wodle that integrates all OpenAI audit events (including logins, modification of API keys or spending limits).
 
 ![screenshot of OpenAI events in Wazuh](/doc/openai%20screenshot.png)
 
@@ -34,4 +34,7 @@ Just follow the installation procedure several times. So:
   </wodle>
 ```
 
-All the events include a `data.openai.orgId` that identifies the OpenAI organisation Id. If you want a specific label you can add a `<tag>name</tag>` to the `ossec.conf`.
+All the events include a `data.openai.org_id` that identifies the OpenAI Organisation ID. If you want a specific label you can add a `<tag>name</tag>` to the `ossec.conf`.
+
+## Attribution
+This contribution was originally developed by [bzhkem](https://github.com/bzhkem) and uploaded with his permission.

@@ -50,7 +50,7 @@ You can test that the wodle works by running it and checking that it outputs log
 You can then close the shell session.
 
 # add rules
-Events only generate alerts if they are matched by a rule. Go to the rules configuration and create a new rules file `0685-gworkspace_rules.xml` and fill it with the contents of [/rules/0685-gworkspace_rules.xml](/rules/0685-gworkspace_rules.xml).
+Events only generate alerts if they are matched by a rule. Go to the rules configuration and create a new rules file `0650-openai_rules.xml` and fill it with the contents of [/rules/0650-openai_rules.xml](/rules/0650-openai_rules.xml).
 
 # change ossec.conf
 Add this wodle configuration to `/var/ossec/etc/ossec.conf` to ensure that the wodle is called periodically by Wazuh. In the Wazuh-provided Docker installion this file is modified in `~/wazuh-docker/multi-node/config/wazuh_cluster`.
